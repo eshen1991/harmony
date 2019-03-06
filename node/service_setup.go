@@ -10,7 +10,8 @@ import (
 	"github.com/harmony-one/harmony/api/service/explorer"
 	"github.com/harmony-one/harmony/api/service/networkinfo"
 	"github.com/harmony-one/harmony/api/service/randomness"
-	"github.com/harmony-one/harmony/api/service/staking"
+
+	//	"github.com/harmony-one/harmony/api/service/staking"
 	nodeconfig "github.com/harmony-one/harmony/internal/configs/node"
 	"github.com/harmony-one/harmony/internal/utils"
 	"github.com/harmony-one/harmony/p2p"
@@ -57,7 +58,7 @@ func (node *Node) setupForBeaconLeader() {
 	// Register new block service.
 	node.serviceManager.RegisterService(service.BlockProposal, blockproposal.New(node.Consensus.ReadySignal, node.WaitForConsensusReady))
 	// Register client support service.
-	node.serviceManager.RegisterService(service.ClientSupport, clientsupport.New(node.blockchain.State, node.CallFaucetContract, node.getDeployedStakingContract, node.SelfPeer.IP, node.SelfPeer.Port))
+	//	node.serviceManager.RegisterService(service.ClientSupport, clientsupport.New(node.blockchain.State, node.CallFaucetContract, node.getDeployedStakingContract, node.SelfPeer.IP, node.SelfPeer.Port))
 	// Register randomness service
 	node.serviceManager.RegisterService(service.Randomness, randomness.New(node.DRand))
 }
@@ -75,7 +76,7 @@ func (node *Node) setupForNewNode() {
 	nodeConfig, chanPeer := node.initNodeConfiguration()
 
 	// Register staking service.
-	node.serviceManager.RegisterService(service.Staking, staking.New(node.host, node.AccountKey, node.beaconChain))
+	//	node.serviceManager.RegisterService(service.Staking, staking.New(node.host, node.AccountKey, node.beaconChain))
 	// Register peer discovery service. "0" is the beacon shard ID
 	node.serviceManager.RegisterService(service.PeerDiscovery, discovery.New(node.host, nodeConfig, chanPeer, node.AddBeaconPeer))
 	// Register networkinfo service. "0" is the beacon shard ID

@@ -200,6 +200,9 @@ func main() {
 			lock.Unlock()
 		case <-time.After(10 * time.Second):
 			utils.GetLogInstance().Warn("No new block is received so far")
+			for i := range shardIDLeaderMap {
+				readySignal <- i
+			}
 		}
 	}
 

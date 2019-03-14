@@ -95,6 +95,7 @@ type DB struct {
 func New(root common.Hash, db Database) (*DB, error) {
 	tr, err := db.OpenTrie(root)
 	if err != nil {
+		fmt.Println("hehe")
 		return nil, err
 	}
 	return &DB{

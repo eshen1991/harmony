@@ -239,6 +239,10 @@ func (bc *BlockChain) getProcInterrupt() bool {
 	return atomic.LoadInt32(&bc.procInterrupt) == 1
 }
 
+func (bc *BlockChain) retrieveLastState(block *types.Block) error {
+	return nil
+}
+
 // loadLastState loads the last known chain state from the database. This method
 // assumes that the chain manager mutex is held.
 func (bc *BlockChain) loadLastState() error {
@@ -264,6 +268,9 @@ func (bc *BlockChain) loadLastState() error {
 			return err
 		}
 	}
+
+	//	bc.retrieveLastState(currentBlock)
+
 	// Everything seems to be fine, set as the head block
 	bc.currentBlock.Store(currentBlock)
 

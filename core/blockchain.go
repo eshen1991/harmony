@@ -202,6 +202,18 @@ func NewBlockChain(db ethdb.Database, cacheConfig *CacheConfig, chainConfig *par
 	return bc, nil
 }
 
+// ReplayLastState will calculate the last state from genesis block until currentBlock
+func (bc *BlockChain) ReplayLastState(currentBlock *types.Block) {
+	height := currentBlock.NumberU64()
+	for i := uint64(0); i < height; i++ {
+		block := bc.GetBlockByNumber(i)
+		if _, err := state.New(block.Root(), bc.stateCache); err != nil {
+			cache, _ := bc.stateCache.TrieDB().Size()
+			log.Warn("haha Head state missing", "number", i, "hash", block.Hash(), "cacheSize", cache)
+		}
+	}
+}
+
 // ValidateNewBlock validates new block.
 func (bc *BlockChain) ValidateNewBlock(block *types.Block, address common.Address) error {
 	state, err := state.New(bc.CurrentBlock().Root(), bc.stateCache)
@@ -260,6 +272,7 @@ func (bc *BlockChain) loadLastState() error {
 		log.Warn("Head block missing, resetting chain", "hash", head)
 		return bc.Reset()
 	}
+
 	// Make sure the state associated with the block is available
 	if _, err := state.New(currentBlock.Root(), bc.stateCache); err != nil {
 		// Dangling block without a state associated, init from scratch
@@ -268,8 +281,6 @@ func (bc *BlockChain) loadLastState() error {
 			return err
 		}
 	}
-
-	//	bc.retrieveLastState(currentBlock)
 
 	// Everything seems to be fine, set as the head block
 	bc.currentBlock.Store(currentBlock)
@@ -975,8 +986,11 @@ func (bc *BlockChain) WriteBlockWithState(block *types.Block, receipts []*types.
 	triedb := bc.stateCache.TrieDB()
 
 	// If we're running an archive node, always flush
+	fmt.Println("haha", "bc.cacheCOnfig.Disabled", bc.cacheConfig.Disabled)
 	if bc.cacheConfig.Disabled {
+		fmt.Println("haha", "root", root.Hex())
 		if err := triedb.Commit(root, false); err != nil {
+			fmt.Println("hihi", "root", root.Hex(), "err", err)
 			return NonStatTy, err
 		}
 	} else {
@@ -1006,6 +1020,7 @@ func (bc *BlockChain) WriteBlockWithState(block *types.Block, receipts []*types.
 				}
 				// Flush an entire trie and restart the counters
 				triedb.Commit(header.Root, true)
+				fmt.Println("lala", "root", root.Hex())
 				lastWrite = chosen
 				bc.gcproc = 0
 			}

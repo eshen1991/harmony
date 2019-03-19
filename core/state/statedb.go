@@ -95,7 +95,6 @@ type DB struct {
 func New(root common.Hash, db Database) (*DB, error) {
 	tr, err := db.OpenTrie(root)
 	if err != nil {
-		fmt.Println("hehe")
 		return nil, err
 	}
 	return &DB{
@@ -107,6 +106,10 @@ func New(root common.Hash, db Database) (*DB, error) {
 		preimages:         make(map[common.Hash][]byte),
 		journal:           newJournal(),
 	}, nil
+}
+
+func (stateDB *DB) GetTrie() Trie {
+	return stateDB.trie
 }
 
 // setError remembers the first non-nil error it is called with.
@@ -682,6 +685,6 @@ func (stateDB *DB) Commit(deleteEmptyObjects bool) (root common.Hash, err error)
 		}
 		return nil
 	})
-	log.Debug("Trie cache stats after commit", "misses", trie.CacheMisses(), "unloads", trie.CacheUnloads())
+	log.Debug("Trie cache stats after commit", "misses", trie.CacheMisses(), "unloads", trie.CacheUnloads(), "heheRoot", root.Hex())
 	return root, err
 }

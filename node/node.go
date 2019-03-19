@@ -478,7 +478,7 @@ func (node *Node) InitBlockChainFromDB(db ethdb.Database, consensus *consensus.C
 	if consensus != nil {
 		chainConfig.ChainID = big.NewInt(int64(consensus.ShardID)) // Use ChainID as piggybacked ShardID
 	}
-	chain, err := core.NewBlockChain(db, nil, chainConfig, consensus, vm.Config{}, nil)
-	utils.GetLogInstance().Debug("hehe", "currentblock", chain.CurrentBlock().NumberU64(), "error", err)
+	cacheConfig := core.CacheConfig{Disabled: true, TrieNodeLimit: 10, TrieTimeLimit: time.Second}
+	chain, err := core.NewBlockChain(db, &cacheConfig, chainConfig, consensus, vm.Config{}, nil)
 	return chain, err
 }

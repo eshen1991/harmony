@@ -685,6 +685,6 @@ func (stateDB *DB) Commit(deleteEmptyObjects bool) (root common.Hash, err error)
 		}
 		return nil
 	})
-	log.Debug("Trie cache stats after commit", "misses", trie.CacheMisses(), "unloads", trie.CacheUnloads(), "heheRoot", root.Hex())
+	log.Debug("Trie cache stats after commit", "misses", trie.CacheMisses(), "unloads", trie.CacheUnloads())
 	return root, err
 }

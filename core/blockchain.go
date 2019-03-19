@@ -150,8 +150,10 @@ type BlockChain struct {
 // available in the database. It initialises the default Ethereum Validator and
 // Processor.
 func NewBlockChain(db ethdb.Database, cacheConfig *CacheConfig, chainConfig *params.ChainConfig, engine consensus_engine.Engine, vmConfig vm.Config, shouldPreserve func(block *types.Block) bool) (*BlockChain, error) {
+
 	if cacheConfig == nil {
 		cacheConfig = &CacheConfig{
+			Disabled:      true,
 			TrieNodeLimit: 256 * 1024 * 1024,
 			TrieTimeLimit: 5 * time.Minute,
 		}
@@ -200,18 +202,6 @@ func NewBlockChain(db ethdb.Database, cacheConfig *CacheConfig, chainConfig *par
 	// Take ownership of this particular state
 	go bc.update()
 	return bc, nil
-}
-
-// ReplayLastState will calculate the last state from genesis block until currentBlock
-func (bc *BlockChain) ReplayLastState(currentBlock *types.Block) {
-	height := currentBlock.NumberU64()
-	for i := uint64(0); i < height; i++ {
-		block := bc.GetBlockByNumber(i)
-		if _, err := state.New(block.Root(), bc.stateCache); err != nil {
-			cache, _ := bc.stateCache.TrieDB().Size()
-			log.Warn("haha Head state missing", "number", i, "hash", block.Hash(), "cacheSize", cache)
-		}
-	}
 }
 
 // ValidateNewBlock validates new block.
@@ -988,9 +978,7 @@ func (bc *BlockChain) WriteBlockWithState(block *types.Block, receipts []*types.
 	// If we're running an archive node, always flush
 	fmt.Println("haha", "bc.cacheCOnfig.Disabled", bc.cacheConfig.Disabled)
 	if bc.cacheConfig.Disabled {
-		fmt.Println("haha", "root", root.Hex())
 		if err := triedb.Commit(root, false); err != nil {
-			fmt.Println("hihi", "root", root.Hex(), "err", err)
 			return NonStatTy, err
 		}
 	} else {

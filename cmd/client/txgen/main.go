@@ -9,6 +9,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/ethereum/go-ethereum/ethdb"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/harmony-one/harmony/api/client"
 	proto_node "github.com/harmony-one/harmony/api/proto/node"
@@ -34,6 +35,18 @@ var (
 func printVersion(me string) {
 	fmt.Fprintf(os.Stderr, "Harmony (C) 2018. %v, version %v-%v (%v %v)\n", path.Base(me), version, commit, builtBy, builtAt)
 	os.Exit(0)
+}
+
+// InitLDBDatabase initializes a LDBDatabase
+func InitLDBDatabase(ip string, port string, freshDB bool) (*ethdb.LDBDatabase, error) {
+	dbFileName := fmt.Sprintf("./db/harmony_%s_%s", ip, port)
+	if freshDB {
+		var err = os.RemoveAll(dbFileName)
+		if err != nil {
+			fmt.Println(err.Error())
+		}
+	}
+	return ethdb.NewLDBDatabase(dbFileName, 0, 0)
 }
 
 // The main entrance for the transaction generator program which simulate transactions and send to the network for
@@ -111,8 +124,13 @@ func main() {
 	if err != nil {
 		panic("unable to new host in txgen")
 	}
+
+	db, err := InitLDBDatabase(*ip, *port, false)
+	if err != nil {
+		panic(err)
+	}
 	for _, shardID := range shardIDs {
-		node := node.New(host, &consensus.Consensus{ShardID: shardID}, nil)
+		node := node.New(host, &consensus.Consensus{ShardID: shardID}, db)
 		// Assign many fake addresses so we have enough address to play with at first
 		nodes = append(nodes, node)
 	}
